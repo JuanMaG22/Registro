@@ -54,9 +54,13 @@ def crear_registro():
     
     correo=request.form['txtCorreo']
     password=request.form['txtPassword']
+    nombre=request.form['txtNombre']
+    apellido=request.form['txtApellido']
+    fecha_nacimiento=request.form['txtFecha']
+    
     
     cur = mysql.connection.cursor()
-    cur.execute(" INSERT INTO usuarios (correo, password, id_rol) VALUES (%s, %s, '2')",(correo,password))
+    cur.execute(" INSERT INTO usuarios (correo, password, nombre, apellido,fecha_nacimiento, id_rol) VALUES (%s, %s, %s, %s, %s, '2')",(correo,password,nombre, apellido, fecha_nacimiento))
     mysql.connection.commit()
     
     return render_template("index.html",mensaje2="Usuario Registrado Exitosamente")
