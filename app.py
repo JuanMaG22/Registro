@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import render_template, request, redirect, Response, url_for, session
 from flask_mysqldb import MySQL,MySQLdb # pip install Flask-MySQLdb
+import re
 
 app = Flask(__name__,template_folder='template')
 
@@ -52,16 +53,28 @@ def registro():
 @app.route('/crear-registro', methods= ["GET", "POST"])
 def crear_registro(): 
     
-    correo=request.form['txtCorreo']
-    password=request.form['txtPassword']
-    nombre=request.form['txtNombre']
-    apellido=request.form['txtApellido']
-    fecha_nacimiento=request.form['txtFecha']
-    
-    
-    cur = mysql.connection.cursor()
-    cur.execute(" INSERT INTO usuarios (correo, password, nombre, apellido,fecha_nacimiento, id_rol) VALUES (%s, %s, %s, %s, %s, '2')",(correo,password,nombre, apellido, fecha_nacimiento))
-    mysql.connection.commit()
+    if request.method == 'POST':
+        correo = request.form['txtCorreo']
+        password = request.form['txtPassword']
+        nombre = request.form['txtNombre']
+        apellido = request.form['txtApellido']
+        fecha_nacimiento = request.form['txtFecha']
+
+        # Expresión regular para verificar si la contraseña contiene al menos un carácter especial
+        if re.match(r'^.*[!@#$%^&*()_+{}\[\]:;<>,.?\/\\~-].*$', password):
+            if len(password) <= 8:
+                # Realizar la inserción en la base de datos
+                cur = mysql.connection.cursor()
+                cur.execute("INSERT INTO usuarios (correo, password, nombre, apellido, fecha_nacimiento, id_rol) VALUES (%s, %s, %s, %s, %s, '2')",
+                            (correo, password, nombre, apellido, fecha_nacimiento))
+                mysql.connection.commit()
+                cur.close()
+
+                return render_template("index.html", mensaje2="Usuario Registrado Exitosamente")
+            else:
+                return render_template("registro.html", mensaje="La contraseña no debe exceder los 8 caracteres")
+        else:
+            return render_template("registro.html", mensaje="La contraseña debe contener al menos un carácter especial")
     
     return render_template("index.html",mensaje2="Usuario Registrado Exitosamente")
 #--------------------------------------------------
