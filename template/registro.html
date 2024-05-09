@@ -40,7 +40,25 @@
     <div class="form-group">
       <label for="exampleInputPassword1 " class="t text-center">Contraseña</label>
       <input type="password" class="form-control"maxlength="8" id="exampleInputPassword1" placeholder="Ingrese su Contraseña" name="txtPassword">
+      <i class='bx bx-show-alt' ></i>
+      
     </div>
+    <script>
+      const exampleInputPassword1 = document.getElementById("exampleInputPassword1"),
+      icon = document.querySelector(".bx");
+
+      icon.addEventListener("click", e => {
+        if(exampleInputPassword1.type === "password"){
+        exampleInputPassword1.type = "text";
+        icon.classList.remove('bx-show-alt')
+        icon.classList.add('bx-low-vision')
+      }else{
+        exampleInputPassword1.type = "password"
+        icon.classList.add('bx-show-alt')
+        icon.classList.remove('bx-low-vision')
+        }
+      })
+  </script>
 
     <div class="form-check">
 

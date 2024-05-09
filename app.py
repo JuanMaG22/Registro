@@ -61,7 +61,7 @@ def crear_registro():
         fecha_nacimiento = request.form['txtFecha']
 
         # Expresión regular para verificar si la contraseña contiene al menos un carácter especial
-        if re.match(r'^.*[!@#$%^&*()_+{}\[\]:;<>,.?\/\\~-].*$', password):
+        if re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', password):
             if len(password) <= 8:
                 # Realizar la inserción en la base de datos
                 cur = mysql.connection.cursor()
@@ -74,7 +74,7 @@ def crear_registro():
             else:
                 return render_template("registro.html", mensaje="La contraseña no debe exceder los 8 caracteres")
         else:
-            return render_template("registro.html", mensaje="La contraseña debe contener al menos un carácter especial")
+            return render_template("registro.html", mensaje="La contraseña debe contener un caracter especial")
     
     return render_template("index.html",mensaje2="Usuario Registrado Exitosamente")
 #--------------------------------------------------
