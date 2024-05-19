@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, request, redirect, Response, url_for, session,jsonify
+from flask import render_template, request, redirect, Response, url_for, session
 from flask_mysqldb import MySQL,MySQLdb # pip install Flask-MySQLdb
 import re
 
@@ -21,34 +21,29 @@ def admin():
     return render_template('admin.html')   
 
 # ACCESO---LOGIN
-@app.route('/acceso-login', methods= ["POST"])
+@app.route('/acceso-login', methods= ["GET", "POST"])
 def login():
-    data = request.get_json()
-    correo = data.get('txtCorreo')
-    password = data.get('txtPassword')
+   
+    if request.method == 'POST' and 'txtCorreo' in request.form and 'txtPassword' in request.form:
+       
+        _correo = request.form['txtCorreo']
+        _password = request.form['txtPassword']
 
-    if correo and password:
         cur = mysql.connection.cursor()
-        cur.execute('SELECT * FROM usuarios WHERE correo = %s AND password = %s', (correo,password,))
+        cur.execute('SELECT * FROM usuarios WHERE correo = %s AND password = %s', (_correo, _password,))
         account = cur.fetchone()
-        cur.close()
-        
+      
         if account:
-            response = {
-                'logueado': True,
-                'id': account['id'],
-                'id_rol': account['id_rol']
-            }
-            if 'id_rol'==1:
-                return render_template("admin.html")           
-            elif 'id_rol' ==2:
+            session['logueado'] = True
+            session['id'] = account['id']
+            session['id_rol']=account['id_rol']
+            
+            if session['id_rol']==1:
+                return render_template("admin.html")
+            elif session ['id_rol']==2:
                 return render_template("usuario.html")
-            return jsonify(response), 200
-                
         else:
-            return jsonify({'mensaje': "Usuario o contraseña incorrectas"}), 401
-    else:
-        return jsonify({'mensaje': "Faltan datos obligatorios"}), 400
+            return render_template('index.html',mensaje="Usuario O Contraseña Incorrectas")
 
 #registro---
 @app.route('/registro')
@@ -57,14 +52,15 @@ def registro():
 
 @app.route('/crear-registro', methods= ["GET", "POST"])
 def crear_registro(): 
-    data = data.get_json()
-    correo = data.get('txtCorreo')
-    password = data.get('txtPassword')
-    nombre = data.get('txtNombre')
-    apellido = data.get('txtApellido')
-    fecha_nacimiento = data.get('txtApellido')
+    
+    if request.method == 'POST':
+        correo = request.form['txtCorreo']
+        password = request.form['txtPassword']
+        nombre = request.form['txtNombre']
+        apellido = request.form['txtApellido']
+        fecha_nacimiento = request.form['txtFecha']
 
-    if correo and password and nombre and apellido and fecha_nacimiento:
+        # Expresión regular para verificar si la contraseña contiene al menos un carácter especial
         if re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', password):
             if len(password) <= 8:
                 # Realizar la inserción en la base de datos
@@ -73,11 +69,12 @@ def crear_registro():
                             (correo, password, nombre, apellido, fecha_nacimiento))
                 mysql.connection.commit()
                 cur.close()
-                return jsonify({'mensaje': "Usuario registrado exitosamente"}), 201
+
+                return render_template("index.html", mensaje2="Usuario Registrado Exitosamente")
             else:
-                return jsonify({'mensaje': "La contraseña no debe exceder los 8 caracteres"}), 400
+                return render_template("registro.html", mensaje="La contraseña no debe exceder los 8 caracteres")
         else:
-            return jsonify({'mensaje': "La contraseña debe contener un caracter especial"}), 400
+            return render_template("registro.html", mensaje="La contraseña debe contener un caracter especial")
     
     return render_template("index.html",mensaje2="Usuario Registrado Exitosamente")
 #--------------------------------------------------
